@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "vulkan\vulkan.h"
 
+VkInstance instance;
+
 int main()
 {
 	VkApplicationInfo appInfo;
@@ -25,6 +27,8 @@ int main()
 	instanceInfo.ppEnabledLayerNames = NULL;
 	instanceInfo.enabledExtensionCount = 0;
 	instanceInfo.ppEnabledExtensionNames = NULL;
+
+	vkCreateInstance(&instanceInfo, NULL, &instance);
 
     return 0;
 }
