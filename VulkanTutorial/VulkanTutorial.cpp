@@ -30,6 +30,10 @@ void printStats(VkPhysicalDevice &device)
 	std::cout << "Device ID: " << properties.deviceID << std::endl;
 	std::cout << "Device Type: " << properties.deviceType << std::endl;
 
+	VkPhysicalDeviceFeatures features;
+	vkGetPhysicalDeviceFeatures(device, &features);
+	std::cout << "Geometry Shader: " << features.geometryShader << std::endl;
+
 	std::cout << std::endl;
 }
 
