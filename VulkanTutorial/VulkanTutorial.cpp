@@ -37,7 +37,32 @@ void printStats(VkPhysicalDevice &device)
 	VkPhysicalDeviceMemoryProperties memProp;
 	vkGetPhysicalDeviceMemoryProperties(device, &memProp);
 
+	uint32_t amountOfQueuefamilies = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &amountOfQueuefamilies, NULL);
+	VkQueueFamilyProperties *familyProperties = new VkQueueFamilyProperties[amountOfQueuefamilies];
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &amountOfQueuefamilies, familyProperties);
+
+	std::cout << "Amount of Queue Families: " << amountOfQueuefamilies << std::endl;
+	for (int i=0; i<amountOfQueuefamilies; i++)
+	{
+		std::cout << std::endl;
+		std::cout << "Queue Family #" << i << std::endl;
+		std::cout << "VK_QUEUE_GRAPHCS_BIT " << ((familyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) << std::endl;
+		std::cout << "VK_QUEUE_COMPUTE_BIT " << ((familyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) != 0) << std::endl;
+		std::cout << "VK_QUEUE_TRANSFER_BIT " << ((familyProperties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) != 0) << std::endl;
+		std::cout << "VK_QUEUE_SPARSE_BINDING_BIT " << ((familyProperties[i].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) != 0) << std::endl;
+		std::cout << "Queue Count: " << familyProperties[i].queueCount << std::endl;
+		std::cout << "Timestamp Valid Bits: " << familyProperties[i].queueCount << std::endl;
+
+		uint32_t width = familyProperties[i].minImageTransferGranularity.width;
+		uint32_t height = familyProperties[i].minImageTransferGranularity.height;
+		uint32_t depth = familyProperties[i].minImageTransferGranularity.depth;
+		std::cout << "Min Image Timestamp Granularity: " << width << ", " << height << ", " << depth << std::endl;
+	}
+
 	std::cout << std::endl;
+
+	delete[] familyProperties;
 }
 
 int main()
