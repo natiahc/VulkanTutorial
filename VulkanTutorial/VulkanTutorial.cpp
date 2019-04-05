@@ -26,9 +26,10 @@ void printStats(VkPhysicalDevice &device)
 		VK_VERSION_MINOR(apiVer) << "." << VK_VERSION_PATCH(apiVer) << std::endl;
 
 	std::cout << "Driver Version: " << properties.driverVersion << std::endl;
-	std::cout << "Vendor ID: " << properties.vendorID << std::endl;
-	std::cout << "Device ID: " << properties.deviceID << std::endl;
-	std::cout << "Device Type: " << properties.deviceType << std::endl;
+	std::cout << "Vendor ID:      " << properties.vendorID << std::endl;
+	std::cout << "Device ID:      " << properties.deviceID << std::endl;
+	std::cout << "Device Type:    " << properties.deviceType << std::endl;
+	std::cout << "discreteQueuePriorities: " << properties.limits.discreteQueuePriorities << std::endl;
 
 	VkPhysicalDeviceFeatures features;
 	vkGetPhysicalDeviceFeatures(device, &features);
@@ -103,6 +104,13 @@ int main()
 		printStats(physicalDevices[i]);
 	}
 
+	VkDeviceQueueCreateInfo deviceQueueCreateInfo;
+	deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	deviceQueueCreateInfo.pNext = NULL;
+	deviceQueueCreateInfo.flags = 0;
+	deviceQueueCreateInfo.queueFamilyIndex = 0;
+	deviceQueueCreateInfo.queueCount = 4;
+	deviceQueueCreateInfo.pQueuePriorities = NULL;
     return 0;
 }
 
