@@ -135,8 +135,10 @@ int main()
 	result = vkEnumeratePhysicalDevices(instance, &amountOfPhysicalDevices, NULL);
 	ASSERT_VULKAN(result);
 
-	VkPhysicalDevice* physicalDevices = new VkPhysicalDevice[amountOfPhysicalDevices];
-	result = vkEnumeratePhysicalDevices(instance, &amountOfPhysicalDevices, physicalDevices);
+	std::vector<VkPhysicalDevice> physicalDevices;
+	physicalDevices.resize(amountOfPhysicalDevices);
+
+	result = vkEnumeratePhysicalDevices(instance, &amountOfPhysicalDevices, physicalDevices.data());
 	ASSERT_VULKAN(result);
 
 	for (int i = 0; i < amountOfPhysicalDevices; i++)
@@ -170,6 +172,14 @@ int main()
 
 	result = vkCreateDevice(physicalDevices[0], &deviceCreateInfo, NULL, &device);
 	ASSERT_VULKAN(result);
+
+	vkDeviceWaitIdle(device);
+
+	vkDestroyDevice(device, NULL);
+	vkDestroyInstance(instance, NULL);
+
+	delete[] layers;
+	delete[] extensions;
 
     return 0;
 }
