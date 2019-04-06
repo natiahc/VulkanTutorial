@@ -95,9 +95,24 @@ int main()
 
 	std::cout << std::endl;
 
-	const std::vector<const char*> validationLayers = {
-		"VK_LAYER_LUNARG_standard_validation",
+	uint32_t amountOfExtensions = 0;
+	vkEnumerateInstanceExtensionProperties(NULL, &amountOfExtensions, NULL);
+	VkExtensionProperties *extensions = new VkExtensionProperties[amountOfExtensions];
+	vkEnumerateInstanceExtensionProperties(NULL, &amountOfExtensions, extensions);
 
+	std::cout << std::endl;
+
+	std::cout << "Amount of extensions: " << amountOfExtensions << std::endl;
+
+	for (int i = 0; i < amountOfExtensions; i++)
+	{
+		std::cout << std::endl;
+		std::cout << "Name: " <<extensions[i].extensionName << std::endl;
+		std::cout << "specVersion: " << extensions[i].specVersion << std::endl;
+	}
+
+	const std::vector<const char*> validationLayers = {
+		"VK_LAYER_LUNARG_standard_validation"
 	};
 
 	VkInstanceCreateInfo instanceInfo;
@@ -111,6 +126,9 @@ int main()
 	instanceInfo.ppEnabledExtensionNames = NULL;
 
 	VkResult result = vkCreateInstance(&instanceInfo, NULL, &instance);
+	
+	//vkGetInstanceProcAddr(instance, "");
+
 	ASSERT_VULKAN(result);
 
 	uint32_t amountOfPhysicalDevices = 0;
