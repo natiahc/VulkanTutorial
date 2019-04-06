@@ -111,6 +111,21 @@ int main()
 	deviceQueueCreateInfo.queueFamilyIndex = 0;
 	deviceQueueCreateInfo.queueCount = 4;
 	deviceQueueCreateInfo.pQueuePriorities = NULL;
+
+	VkPhysicalDeviceFeatures usedFeature = {};
+
+	VkDeviceCreateInfo deviceCreateInfo;
+	deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	deviceCreateInfo.pNext = NULL;
+	deviceCreateInfo.flags = 0;
+	deviceCreateInfo.queueCreateInfoCount = 1;
+	deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
+	deviceCreateInfo.enabledLayerCount = 0;
+	deviceCreateInfo.ppEnabledLayerNames = NULL;
+	deviceCreateInfo.enabledExtensionCount = 0;
+	deviceCreateInfo.ppEnabledExtensionNames = NULL;
+	deviceCreateInfo.pEnabledFeatures = &usedFeature;
+
     return 0;
 }
 
