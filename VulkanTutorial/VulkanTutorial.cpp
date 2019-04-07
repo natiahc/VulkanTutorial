@@ -18,6 +18,7 @@
 		}
 
 VkInstance instance;
+VkSurfaceKHR surface;
 VkDevice device;
 GLFWwindow *window;
 
@@ -134,6 +135,8 @@ void startVulkan()
 	//	VK_KHR_WIN32_SURFACE_EXTENSION_NAME
 	//};
 
+	uint32_t amountOfGlfwExtensions = 0;
+	auto glfwExtensions = glfwGetRequiredInstanceExtensions(&amountOfGlfwExtensions);
 
 	VkInstanceCreateInfo instanceInfo;
 	instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -142,13 +145,14 @@ void startVulkan()
 	instanceInfo.pApplicationInfo = &appInfo;
 	instanceInfo.enabledLayerCount = validationLayers.size();
 	instanceInfo.ppEnabledLayerNames = validationLayers.data();
-	instanceInfo.enabledExtensionCount = 0;// usedExtenesions.size();
-	instanceInfo.ppEnabledExtensionNames = nullptr;//usedExtenesions.data();
+	instanceInfo.enabledExtensionCount = amountOfGlfwExtensions;// usedExtenesions.size();
+	instanceInfo.ppEnabledExtensionNames = glfwExtensions;//usedExtenesions.data();
 
 	VkResult result = vkCreateInstance(&instanceInfo, nullptr, &instance);
-
 	//vkGetInstanceProcAddr(instance, "");
+	ASSERT_VULKAN(result);
 
+	result = glfwCreateWindowSurface(instance, window, nullptr, &surface);
 	ASSERT_VULKAN(result);
 
 	//VkWin32SurfaceCreateInfoKHR surfaceCreateInfo;
@@ -224,7 +228,7 @@ void shutdownVulkan()
 	vkDeviceWaitIdle(device);
 
 	vkDestroyDevice(device, nullptr);
-	//	vkDestroySurfaceKHR(instance, surface, nullptr);
+	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
 }
 
