@@ -41,7 +41,7 @@ void printStats(VkPhysicalDevice &device)
 	vkGetPhysicalDeviceMemoryProperties(device, &memProp);
 
 	uint32_t amountOfQueuefamilies = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties(device, &amountOfQueuefamilies, NULL);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &amountOfQueuefamilies, nullptr);
 	VkQueueFamilyProperties *familyProperties = new VkQueueFamilyProperties[amountOfQueuefamilies];
 	vkGetPhysicalDeviceQueueFamilyProperties(device, &amountOfQueuefamilies, familyProperties);
 
@@ -72,7 +72,7 @@ int main()
 {
 	VkApplicationInfo appInfo;
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.pNext = NULL;
+	appInfo.pNext = nullptr;
 	appInfo.pApplicationName = "Vulkan Tutorial";
 	appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
 	appInfo.pEngineName = "Super Vulkan Engine Turbo Mega";
@@ -80,7 +80,7 @@ int main()
 	appInfo.apiVersion = VK_API_VERSION_1_0;
 
 	uint32_t amountOfLayers = 0;
-	vkEnumerateInstanceLayerProperties(&amountOfLayers, NULL);
+	vkEnumerateInstanceLayerProperties(&amountOfLayers, nullptr);
 	VkLayerProperties *layers = new VkLayerProperties[amountOfLayers];
 	vkEnumerateInstanceLayerProperties(&amountOfLayers, layers);
 	std::cout << "Amount of instance Layers: " << amountOfLayers << std::endl;
@@ -96,9 +96,9 @@ int main()
 	std::cout << std::endl;
 
 	uint32_t amountOfExtensions = 0;
-	vkEnumerateInstanceExtensionProperties(NULL, &amountOfExtensions, NULL);
+	vkEnumerateInstanceExtensionProperties(nullptr, &amountOfExtensions, nullptr);
 	VkExtensionProperties *extensions = new VkExtensionProperties[amountOfExtensions];
-	vkEnumerateInstanceExtensionProperties(NULL, &amountOfExtensions, extensions);
+	vkEnumerateInstanceExtensionProperties(nullptr, &amountOfExtensions, extensions);
 
 	std::cout << std::endl;
 
@@ -117,22 +117,22 @@ int main()
 
 	VkInstanceCreateInfo instanceInfo;
 	instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	instanceInfo.pNext = NULL;
+	instanceInfo.pNext = nullptr;
 	instanceInfo.flags = 0;
 	instanceInfo.pApplicationInfo = &appInfo;
 	instanceInfo.enabledLayerCount = validationLayers.size();
 	instanceInfo.ppEnabledLayerNames = validationLayers.data();
 	instanceInfo.enabledExtensionCount = 0;
-	instanceInfo.ppEnabledExtensionNames = NULL;
+	instanceInfo.ppEnabledExtensionNames = nullptr;
 
-	VkResult result = vkCreateInstance(&instanceInfo, NULL, &instance);
+	VkResult result = vkCreateInstance(&instanceInfo, nullptr, &instance);
 	
 	//vkGetInstanceProcAddr(instance, "");
 
 	ASSERT_VULKAN(result);
 
 	uint32_t amountOfPhysicalDevices = 0;
-	result = vkEnumeratePhysicalDevices(instance, &amountOfPhysicalDevices, NULL);
+	result = vkEnumeratePhysicalDevices(instance, &amountOfPhysicalDevices, nullptr);
 	ASSERT_VULKAN(result);
 
 	std::vector<VkPhysicalDevice> physicalDevices;
@@ -150,33 +150,36 @@ int main()
 
 	VkDeviceQueueCreateInfo deviceQueueCreateInfo;
 	deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	deviceQueueCreateInfo.pNext = NULL;
+	deviceQueueCreateInfo.pNext = nullptr;
 	deviceQueueCreateInfo.flags = 0;
 	deviceQueueCreateInfo.queueFamilyIndex = 0;
-	deviceQueueCreateInfo.queueCount = 4;
+	deviceQueueCreateInfo.queueCount = 1;
 	deviceQueueCreateInfo.pQueuePriorities = queuePrios;
 
 	VkPhysicalDeviceFeatures usedFeature = {};
 
 	VkDeviceCreateInfo deviceCreateInfo;
 	deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	deviceCreateInfo.pNext = NULL;
+	deviceCreateInfo.pNext = nullptr;
 	deviceCreateInfo.flags = 0;
 	deviceCreateInfo.queueCreateInfoCount = 1;
 	deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
 	deviceCreateInfo.enabledLayerCount = 0;
-	deviceCreateInfo.ppEnabledLayerNames = NULL;
+	deviceCreateInfo.ppEnabledLayerNames = nullptr;
 	deviceCreateInfo.enabledExtensionCount = 0;
-	deviceCreateInfo.ppEnabledExtensionNames = NULL;
+	deviceCreateInfo.ppEnabledExtensionNames = nullptr;
 	deviceCreateInfo.pEnabledFeatures = &usedFeature;
 
-	result = vkCreateDevice(physicalDevices[0], &deviceCreateInfo, NULL, &device);
+	result = vkCreateDevice(physicalDevices[0], &deviceCreateInfo, nullptr, &device);
 	ASSERT_VULKAN(result);
+
+	VkQueue queue;
+	vkGetDeviceQueue(device, 0, 0, &queue);
 
 	vkDeviceWaitIdle(device);
 
-	vkDestroyDevice(device, NULL);
-	vkDestroyInstance(instance, NULL);
+	vkDestroyDevice(device, nullptr);
+	vkDestroyInstance(instance, nullptr);
 
 	delete[] layers;
 	delete[] extensions;
