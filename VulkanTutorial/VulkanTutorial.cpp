@@ -296,6 +296,13 @@ void startVulkan()
 	result = vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain);
 	ASSERT_VULKAN(result);
 
+	uint32_t amountOfImagesInSwapchain = 0;
+	vkGetSwapchainImagesKHR(device, swapchain, &amountOfImagesInSwapchain, nullptr);
+	VkImage *swapchainImages = new VkImage[amountOfImagesInSwapchain];
+	result = vkGetSwapchainImagesKHR(device, swapchain, &amountOfImagesInSwapchain, swapchainImages);
+	ASSERT_VULKAN(result);
+
+	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
 }
