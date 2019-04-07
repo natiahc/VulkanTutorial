@@ -99,9 +99,23 @@ void printStats(VkPhysicalDevice &device)
 		std::cout << "Format: " << surfaceFormats[i].format << std::endl;
 	}
 
+	uint32_t amountOfPresentationModes = 0;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &amountOfPresentationModes, nullptr);
+	VkPresentModeKHR *presentModes = new VkPresentModeKHR[amountOfPresentationModes];
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &amountOfPresentationModes, presentModes);
+
+	std::cout << std::endl;
+
+	std::cout << "Amount of Presentation Modes: " << amountOfPresentationModes << std::endl;
+	for (int i = 0; i < amountOfPresentationModes; i++)
+	{
+		std::cout << "Supported Presentation Mode: " << presentModes[i] << std::endl;
+	}
+
 	std::cout << std::endl;
 	delete[] familyProperties;
 	delete[] surfaceFormats;
+	delete[] presentModes;
 }
 
 void startGlfw()
