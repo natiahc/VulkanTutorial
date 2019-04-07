@@ -2,8 +2,11 @@
 //
 
 #include "stdafx.h"
-#define VK_USE_PLATFORM_WIN32_KHR
-#include "vulkan\vulkan.h"
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW\glfw3.h>
+//#define VK_USE_PLATFORM_WIN32_KHR
+//#include "vulkan\vulkan.h"
 
 #include <iostream>
 #include <vector>
@@ -16,6 +19,7 @@
 
 VkInstance instance;
 VkDevice device;
+GLFWwindow *window;
 
 void printStats(VkPhysicalDevice &device)
 {
@@ -69,7 +73,16 @@ void printStats(VkPhysicalDevice &device)
 	delete[] familyProperties;
 }
 
-int main()
+void startGlfw()
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+	window = glfwCreateWindow(400, 300, "Vulkan Tutorial", nullptr, nullptr);
+}
+
+void startVulkan()
 {
 	VkApplicationInfo appInfo;
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -108,17 +121,18 @@ int main()
 	for (int i = 0; i < amountOfExtensions; i++)
 	{
 		std::cout << std::endl;
-		std::cout << "Name: " <<extensions[i].extensionName << std::endl;
+		std::cout << "Name: " << extensions[i].extensionName << std::endl;
 		std::cout << "specVersion: " << extensions[i].specVersion << std::endl;
 	}
 
 	const std::vector<const char*> validationLayers = {
 		"VK_LAYER_LUNARG_standard_validation"
 	};
-	const std::vector<const char*> usedExtenesions = {
-		"VK_KHR_surface",
-		VK_KHR_WIN32_SURFACE_EXTENSION_NAME
-	};
+
+	//const std::vector<const char*> usedExtenesions = {
+	//	"VK_KHR_surface",
+	//	VK_KHR_WIN32_SURFACE_EXTENSION_NAME
+	//};
 
 
 	VkInstanceCreateInfo instanceInfo;
@@ -128,25 +142,25 @@ int main()
 	instanceInfo.pApplicationInfo = &appInfo;
 	instanceInfo.enabledLayerCount = validationLayers.size();
 	instanceInfo.ppEnabledLayerNames = validationLayers.data();
-	instanceInfo.enabledExtensionCount = usedExtenesions.size();
-	instanceInfo.ppEnabledExtensionNames = usedExtenesions.data();
+	instanceInfo.enabledExtensionCount = 0;// usedExtenesions.size();
+	instanceInfo.ppEnabledExtensionNames = nullptr;//usedExtenesions.data();
 
 	VkResult result = vkCreateInstance(&instanceInfo, nullptr, &instance);
-	
+
 	//vkGetInstanceProcAddr(instance, "");
 
 	ASSERT_VULKAN(result);
 
-	VkWin32SurfaceCreateInfoKHR surfaceCreateInfo;
-	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR;
-	surfaceCreateInfo.pNext = nullptr;
-	surfaceCreateInfo.flags = 0;
-	surfaceCreateInfo.hinstance = nullptr;
-	surfaceCreateInfo.hwnd = nullptr;
+	//VkWin32SurfaceCreateInfoKHR surfaceCreateInfo;
+	//surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR;
+	//surfaceCreateInfo.pNext = nullptr;
+	//surfaceCreateInfo.flags = 0;
+	//surfaceCreateInfo.hinstance = nullptr;
+	//surfaceCreateInfo.hwnd = nullptr;
 
-	VkSurfaceKHR surface;
-	result = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface);
-	ASSERT_VULKAN(result);
+	//VkSurfaceKHR surface;
+	//result = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface);
+	//ASSERT_VULKAN(result);
 
 	uint32_t amountOfPhysicalDevices = 0;
 	result = vkEnumeratePhysicalDevices(instance, &amountOfPhysicalDevices, nullptr);
@@ -193,14 +207,37 @@ int main()
 	VkQueue queue;
 	vkGetDeviceQueue(device, 0, 0, &queue);
 
+	delete[] layers;
+	delete[] extensions;
+}
+
+void gameLoop()
+{
+	while(!glfwWindowShouldClose(window))
+	{
+		glfwPollEvents();
+	}
+}
+
+void shutdownVulkan()
+{
 	vkDeviceWaitIdle(device);
 
 	vkDestroyDevice(device, nullptr);
-	vkDestroySurfaceKHR(instance, surface, nullptr);
+	//	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
+}
 
-	delete[] layers;
-	delete[] extensions;
+void shutdownGlfw()
+{}
+
+int main()
+{
+	startGlfw();
+	startVulkan();
+	gameLoop();
+	shutdownVulkan();
+	shutdownGlfw();
 
     return 0;
 }
