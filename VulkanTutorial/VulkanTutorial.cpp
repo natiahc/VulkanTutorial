@@ -22,6 +22,9 @@ VkSurfaceKHR surface;
 VkDevice device;
 GLFWwindow *window;
 
+const uint32_t WIDTH = 400;
+const uint32_t HEIGHT = 300;
+
 void printStats(VkPhysicalDevice &device)
 {
 	VkPhysicalDeviceProperties properties;
@@ -124,7 +127,7 @@ void startGlfw()
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-	window = glfwCreateWindow(400, 300, "Vulkan Tutorial", nullptr, nullptr);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan Tutorial", nullptr, nullptr);
 }
 
 void startVulkan()
@@ -254,6 +257,26 @@ void startVulkan()
 
 	VkQueue queue;
 	vkGetDeviceQueue(device, 0, 0, &queue);
+
+	VkSwapchainCreateInfoKHR swapChainCreatInfo;
+	swapChainCreatInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	swapChainCreatInfo.pNext = nullptr;
+	swapChainCreatInfo.flags = 0;
+	swapChainCreatInfo.surface = surface;
+	swapChainCreatInfo.minImageCount = 3;
+	swapChainCreatInfo.imageFormat = VK_FORMAT_B8G8R8_UNORM;
+	swapChainCreatInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+	swapChainCreatInfo.imageExtent = VkExtent2D{ WIDTH, HEIGHT };
+	swapChainCreatInfo.imageArrayLayers = 1;
+	swapChainCreatInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	swapChainCreatInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	swapChainCreatInfo.queueFamilyIndexCount = 0;
+	swapChainCreatInfo.pQueueFamilyIndices = nullptr;
+	swapChainCreatInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+	swapChainCreatInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	swapChainCreatInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+	swapChainCreatInfo.clipped = VK_TRUE;
+	swapChainCreatInfo.oldSwapchain = VK_NULL_HANDLE;
 
 	delete[] layers;
 	delete[] extensions;
