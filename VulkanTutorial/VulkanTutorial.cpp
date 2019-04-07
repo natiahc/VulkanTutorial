@@ -229,7 +229,9 @@ void shutdownVulkan()
 }
 
 void shutdownGlfw()
-{}
+{
+	glfwDestroyWindow(window);
+}
 
 int main()
 {
