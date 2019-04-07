@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#define VK_USE_PLATFORM_WIN32_KHR
 #include "vulkan\vulkan.h"
 
 #include <iostream>
@@ -114,6 +115,11 @@ int main()
 	const std::vector<const char*> validationLayers = {
 		"VK_LAYER_LUNARG_standard_validation"
 	};
+	const std::vector<const char*> usedExtenesions = {
+		"VK_KHR_surface",
+		VK_KHR_WIN32_SURFACE_EXTENSION_NAME
+	};
+
 
 	VkInstanceCreateInfo instanceInfo;
 	instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -122,13 +128,24 @@ int main()
 	instanceInfo.pApplicationInfo = &appInfo;
 	instanceInfo.enabledLayerCount = validationLayers.size();
 	instanceInfo.ppEnabledLayerNames = validationLayers.data();
-	instanceInfo.enabledExtensionCount = 0;
-	instanceInfo.ppEnabledExtensionNames = nullptr;
+	instanceInfo.enabledExtensionCount = usedExtenesions.size();
+	instanceInfo.ppEnabledExtensionNames = usedExtenesions.data();
 
 	VkResult result = vkCreateInstance(&instanceInfo, nullptr, &instance);
 	
 	//vkGetInstanceProcAddr(instance, "");
 
+	ASSERT_VULKAN(result);
+
+	VkWin32SurfaceCreateInfoKHR surfaceCreateInfo;
+	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR;
+	surfaceCreateInfo.pNext = nullptr;
+	surfaceCreateInfo.flags = 0;
+	surfaceCreateInfo.hinstance = nullptr;
+	surfaceCreateInfo.hwnd = nullptr;
+
+	VkSurfaceKHR surface;
+	result = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface);
 	ASSERT_VULKAN(result);
 
 	uint32_t amountOfPhysicalDevices = 0;
@@ -179,6 +196,7 @@ int main()
 	vkDeviceWaitIdle(device);
 
 	vkDestroyDevice(device, nullptr);
+	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
 
 	delete[] layers;
