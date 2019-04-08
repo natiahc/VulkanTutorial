@@ -404,6 +404,14 @@ void startVulkan()
 	inputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
+	VkViewport viewport;
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = WIDTH;
+	viewport.height = HEIGHT;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
