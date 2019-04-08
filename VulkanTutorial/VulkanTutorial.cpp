@@ -21,6 +21,8 @@ VkInstance instance;
 VkSurfaceKHR surface;
 VkDevice device;
 VkSwapchainKHR swapchain;
+VkImageView *imageViews;
+uint32_t amountOfImagesInSwapchain = 0;
 GLFWwindow *window;
 
 const uint32_t WIDTH = 400;
@@ -296,28 +298,34 @@ void startVulkan()
 	result = vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain);
 	ASSERT_VULKAN(result);
 
-	uint32_t amountOfImagesInSwapchain = 0;
 	vkGetSwapchainImagesKHR(device, swapchain, &amountOfImagesInSwapchain, nullptr);
 	VkImage *swapchainImages = new VkImage[amountOfImagesInSwapchain];
 	result = vkGetSwapchainImagesKHR(device, swapchain, &amountOfImagesInSwapchain, swapchainImages);
 	ASSERT_VULKAN(result);
 
-	VkImageViewCreateInfo imageViewCreateInfo;
-	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	imageViewCreateInfo.pNext = nullptr;
-	imageViewCreateInfo.flags = 0;
-	imageViewCreateInfo.image = swapchainImages[0];
-	imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	imageViewCreateInfo.format = VK_FORMAT_B8G8R8A8_SNORM;
-	imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-	imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-	imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-	imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-	imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-	imageViewCreateInfo.subresourceRange.levelCount = 1;
-	imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-	imageViewCreateInfo.subresourceRange.layerCount = 1;
+	imageViews = new VkImageView[amountOfImagesInSwapchain];
+	for (int i = 0; i < amountOfImagesInSwapchain; i++)
+	{
+		VkImageViewCreateInfo imageViewCreateInfo;
+		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		imageViewCreateInfo.pNext = nullptr;
+		imageViewCreateInfo.flags = 0;
+		imageViewCreateInfo.image = swapchainImages[i];
+		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		imageViewCreateInfo.format = VK_FORMAT_B8G8R8A8_UNORM;
+		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+		imageViewCreateInfo.subresourceRange.levelCount = 1;
+		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+		imageViewCreateInfo.subresourceRange.layerCount = 1;
+
+		result = vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]);
+		ASSERT_VULKAN(result);
+	}
 
 	delete[] swapchainImages;
 	delete[] layers;
@@ -336,6 +344,12 @@ void shutdownVulkan()
 {
 	vkDeviceWaitIdle(device);
 
+	for (int i = 0; i < amountOfImagesInSwapchain; i++)
+	{
+		vkDestroyImageView(device, imageViews[i], nullptr);
+	}
+
+	delete[] imageViews;
 	vkDestroySwapchainKHR(device, swapchain, nullptr);
 	vkDestroyDevice(device, nullptr);
 	vkDestroySurfaceKHR(instance, surface, nullptr);
