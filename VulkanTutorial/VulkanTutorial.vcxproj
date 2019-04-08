@@ -170,6 +170,7 @@
     <ClCompile Include="VulkanTutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shader.frag" />
     <None Include="shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

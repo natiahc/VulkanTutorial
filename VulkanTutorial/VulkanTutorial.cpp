@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 #define ASSERT_VULKAN(val)\
 		if(val!=VK_SUCCESS) \
@@ -122,6 +123,25 @@ void printStats(VkPhysicalDevice &device)
 	delete[] familyProperties;
 	delete[] surfaceFormats;
 	delete[] presentModes;
+}
+
+std::vector<char> readFile(std::string fileName)
+{
+	std::ifstream file(fileName, std::ios::binary | std::ios::ate);
+
+	if (file)
+	{
+		size_t fileSize = (size_t)file.tellg();
+		std::vector<char> fileBuffer(fileSize);
+		file.seekg(0);
+		file.read(fileBuffer.data(), fileSize);
+		file.close();
+		return fileBuffer;
+	}
+	else 
+	{
+		throw std::runtime_error("Failed to open file!!!");
+	}
 }
 
 void startGlfw()
@@ -326,6 +346,9 @@ void startVulkan()
 		result = vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]);
 		ASSERT_VULKAN(result);
 	}
+
+	auto shadercodeVert = readFile("vert.spv");
+	auto shadercodeFrag = readFile("frag.spv");
 
 	delete[] swapchainImages;
 	delete[] layers;
