@@ -350,6 +350,13 @@ void startVulkan()
 	auto shadercodeVert = readFile("vert.spv");
 	auto shadercodeFrag = readFile("frag.spv");
 
+	VkShaderModuleCreateInfo shaderCreatInfo;
+	shaderCreatInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	shaderCreatInfo.pNext = nullptr;
+	shaderCreatInfo.flags = 0;
+	shaderCreatInfo.codeSize = shadercodeVert.size();
+	shaderCreatInfo.pCode = (uint32_t*)shadercodeVert.data();
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
