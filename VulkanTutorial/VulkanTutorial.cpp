@@ -412,6 +412,10 @@ void startVulkan()
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
+	VkRect2D scissor;
+	scissor.offset = { 0, 0 };
+	scissor.extent = { WIDTH, HEIGHT };
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
