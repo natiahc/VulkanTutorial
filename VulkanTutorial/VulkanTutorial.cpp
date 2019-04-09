@@ -440,6 +440,17 @@ void startVulkan()
 	rasterizationCreatInfo.depthBiasSlopeFactor = 0.0f;
 	rasterizationCreatInfo.lineWidth = 0.0f;
 
+	VkPipelineMultisampleStateCreateInfo multiSampleCreateInfo;
+	multiSampleCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multiSampleCreateInfo.pNext = nullptr;
+	multiSampleCreateInfo.flags = 0;
+	multiSampleCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	multiSampleCreateInfo.sampleShadingEnable = VK_FALSE;
+	multiSampleCreateInfo.minSampleShading = 1.0f;
+	multiSampleCreateInfo.pSampleMask = nullptr;
+	multiSampleCreateInfo.alphaToCoverageEnable = VK_FALSE;
+	multiSampleCreateInfo.alphaToOneEnable = VK_FALSE;
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
