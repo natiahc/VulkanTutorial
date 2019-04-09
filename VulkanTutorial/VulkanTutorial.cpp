@@ -25,6 +25,7 @@ VkSwapchainKHR swapchain;
 VkImageView *imageViews;
 VkShaderModule shaderModuleVert;
 VkShaderModule shaderModuleFrag;
+VkPipelineLayout pipelineLayout;
 uint32_t amountOfImagesInSwapchain = 0;
 GLFWwindow *window;
 
@@ -483,6 +484,9 @@ void startVulkan()
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 	pipelineLayoutCreateInfo.pPushConstantRanges = 0;
 
+	result = vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
+	ASSERT_VULKAN(result);
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
@@ -506,6 +510,7 @@ void shutdownVulkan()
 	}
 
 	delete[] imageViews;
+	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 	vkDestroyShaderModule(device, shaderModuleVert, nullptr);
 	vkDestroyShaderModule(device, shaderModuleFrag, nullptr);
 	vkDestroySwapchainKHR(device, swapchain, nullptr);
