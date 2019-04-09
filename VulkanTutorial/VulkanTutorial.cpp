@@ -461,6 +461,19 @@ void startVulkan()
 	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 
+	VkPipelineColorBlendStateCreateInfo colorBlendCreateInfo;
+	colorBlendCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	colorBlendCreateInfo.pNext = nullptr;
+	colorBlendCreateInfo.flags = 0;
+	colorBlendCreateInfo.logicOpEnable = VK_FALSE;
+	colorBlendCreateInfo.logicOp = VK_LOGIC_OP_NO_OP;
+	colorBlendCreateInfo.attachmentCount = 1;
+	colorBlendCreateInfo.pAttachments = &colorBlendAttachment;
+	colorBlendCreateInfo.blendConstants[0] = 0.0f;
+	colorBlendCreateInfo.blendConstants[1] = 0.0f;
+	colorBlendCreateInfo.blendConstants[2] = 0.0f;
+	colorBlendCreateInfo.blendConstants[3] = 0.0f;
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
