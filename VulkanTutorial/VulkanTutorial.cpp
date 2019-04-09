@@ -425,6 +425,21 @@ void startVulkan()
 	viewportStateCreateInfo.scissorCount = 1;
 	viewportStateCreateInfo.pScissors = &scissor;
 
+	VkPipelineRasterizationStateCreateInfo rasterizationCreatInfo;
+	rasterizationCreatInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterizationCreatInfo.pNext = nullptr;
+	rasterizationCreatInfo.flags = 0;
+	rasterizationCreatInfo.depthClampEnable = VK_FALSE;
+	rasterizationCreatInfo.rasterizerDiscardEnable = VK_FALSE;
+	rasterizationCreatInfo.polygonMode = VK_POLYGON_MODE_FILL;
+	rasterizationCreatInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+	rasterizationCreatInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizationCreatInfo.depthBiasEnable = VK_FALSE;
+	rasterizationCreatInfo.depthBiasConstantFactor = 0.0f;
+	rasterizationCreatInfo.depthBiasClamp = 0.0f;
+	rasterizationCreatInfo.depthBiasSlopeFactor = 0.0f;
+	rasterizationCreatInfo.lineWidth = 0.0f;
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
