@@ -31,6 +31,7 @@ GLFWwindow *window;
 
 const uint32_t WIDTH = 400;
 const uint32_t HEIGHT = 300;
+const VkFormat ourFormat = VK_FORMAT_B8G8R8A8_UNORM;
 
 void printStats(VkPhysicalDevice &device)
 {
@@ -317,7 +318,7 @@ void startVulkan()
 	swapchainCreateInfo.flags = 0;
 	swapchainCreateInfo.surface = surface;
 	swapchainCreateInfo.minImageCount = 3;
-	swapchainCreateInfo.imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
+	swapchainCreateInfo.imageFormat = ourFormat;
 	swapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 	swapchainCreateInfo.imageExtent = VkExtent2D{ WIDTH, HEIGHT };
 	swapchainCreateInfo.imageArrayLayers = 1;
@@ -348,7 +349,7 @@ void startVulkan()
 		imageViewCreateInfo.flags = 0;
 		imageViewCreateInfo.image = swapchainImages[i];
 		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		imageViewCreateInfo.format = VK_FORMAT_B8G8R8A8_UNORM;
+		imageViewCreateInfo.format = ourFormat;
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -486,6 +487,17 @@ void startVulkan()
 
 	result = vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
 	ASSERT_VULKAN(result);
+
+	VkAttachmentDescription attachmentDescription;
+	attachmentDescription.flags = 0;
+	attachmentDescription.format = ourFormat;
+	attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+	attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 	delete[] swapchainImages;
 	delete[] layers;
