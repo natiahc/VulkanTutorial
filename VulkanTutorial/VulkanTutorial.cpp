@@ -604,7 +604,20 @@ void startVulkan()
 
 	for (size_t i = 0; i < amountOfImagesInSwapchain; i++)
 	{
-		vkBeginCommandBuffer(commandBuffers[i], &commandBufferBeginInfo);
+		result = vkBeginCommandBuffer(commandBuffers[i], &commandBufferBeginInfo);
+		ASSERT_VULKAN(result);
+
+		VkRenderPassBeginInfo renderPassBeginInfo;
+		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.pNext = nullptr;
+		renderPassBeginInfo.renderPass = renderPass;
+		renderPassBeginInfo.framebuffer = framebuffers[i];
+		renderPassBeginInfo.renderArea.offset = { 0, 0 };
+		renderPassBeginInfo.renderArea.extent = { WIDTH, HEIGHT };
+
+		VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 1.0f };
+		renderPassBeginInfo.clearValueCount = 1;
+		renderPassBeginInfo.pClearValues = &clearValue;
 		
 		result = vkEndCommandBuffer(commandBuffers[i]);
 		ASSERT_VULKAN(result);
