@@ -618,6 +618,9 @@ void startVulkan()
 		VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 1.0f };
 		renderPassBeginInfo.clearValueCount = 1;
 		renderPassBeginInfo.pClearValues = &clearValue;
+
+		vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdEndRenderPass(commandBuffers[i]);
 		
 		result = vkEndCommandBuffer(commandBuffers[i]);
 		ASSERT_VULKAN(result);
