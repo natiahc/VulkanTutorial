@@ -33,6 +33,7 @@ VkCommandPool commandPool;
 VkCommandBuffer *commandBuffers;
 VkSemaphore semaphoreImageAvailable;
 VkSemaphore semaphoreRenderingDone;
+VkQueue queue;
 uint32_t amountOfImagesInSwapchain = 0;
 GLFWwindow *window;
 
@@ -306,7 +307,6 @@ void startVulkan()
 	result = vkCreateDevice(physicalDevices[0], &deviceCreateInfo, nullptr, &device);
 	ASSERT_VULKAN(result);
 
-	VkQueue queue;
 	vkGetDeviceQueue(device, 0, 0, &queue);
 
 	VkBool32 surfaceSupport = false;
@@ -667,6 +667,9 @@ void drawFrame()
 	submitInfo.pCommandBuffers = &(commandBuffers[imageIndex]);
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = &semaphoreRenderingDone;
+
+	VkResult result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+	ASSERT_VULKAN(result);
 }
 
 void gameLoop()
