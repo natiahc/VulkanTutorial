@@ -631,16 +631,25 @@ void startVulkan()
 		ASSERT_VULKAN(result);
 	}
 
+	VkSemaphoreCreateInfo semaphoreCreateInfo;
+	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	semaphoreCreateInfo.pNext = nullptr;
+	semaphoreCreateInfo.flags = 0;
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
 }
+
+void drawFrame()
+{}
 
 void gameLoop()
 {
 	while(!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
+		drawFrame();
 	}
 }
 
