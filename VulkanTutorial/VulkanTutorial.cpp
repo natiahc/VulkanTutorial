@@ -620,6 +620,9 @@ void startVulkan()
 		renderPassBeginInfo.pClearValues = &clearValue;
 
 		vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+
 		vkCmdEndRenderPass(commandBuffers[i]);
 		
 		result = vkEndCommandBuffer(commandBuffers[i]);
