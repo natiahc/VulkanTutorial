@@ -21,6 +21,7 @@
 VkInstance instance;
 VkSurfaceKHR surface;
 VkDevice device;
+VkFramebuffer *framebuffers;
 VkSwapchainKHR swapchain;
 VkImageView *imageViews;
 VkShaderModule shaderModuleVert;
@@ -442,7 +443,7 @@ void startVulkan()
 	rasterizationCreatInfo.depthBiasConstantFactor = 0.0f;
 	rasterizationCreatInfo.depthBiasClamp = 0.0f;
 	rasterizationCreatInfo.depthBiasSlopeFactor = 0.0f;
-	rasterizationCreatInfo.lineWidth = 0.0f;
+	rasterizationCreatInfo.lineWidth = 1.0f;
 
 	VkPipelineMultisampleStateCreateInfo multiSampleCreateInfo;
 	multiSampleCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -555,6 +556,7 @@ void startVulkan()
 	result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline);
 	ASSERT_VULKAN(result);
 
+	framebuffers = new VkFramebuffer[amountOfImagesInSwapchain];
 	for (size_t i = 0; i < amountOfImagesInSwapchain; i++)
 	{
 		VkFramebufferCreateInfo framebufferCreatInfo;
@@ -567,6 +569,9 @@ void startVulkan()
 		framebufferCreatInfo.width = WIDTH;
 		framebufferCreatInfo.height = HEIGHT;
 		framebufferCreatInfo.layers = 1;
+
+		result = vkCreateFramebuffer(device, &framebufferCreatInfo, nullptr, &(framebuffers[i]));
+		ASSERT_VULKAN(result);
 	}
 
 	delete[] swapchainImages;
@@ -585,6 +590,12 @@ void gameLoop()
 void shutdownVulkan()
 {
 	vkDeviceWaitIdle(device);
+	for (size_t i = 0; i < amountOfImagesInSwapchain; i++)
+	{
+		vkDestroyFramebuffer(device, framebuffers[i], nullptr);
+	}
+	delete[] framebuffers;
+
 	vkDestroyPipeline(device, pipeline, nullptr);
 	vkDestroyRenderPass(device, renderPass, nullptr);
 	for (int i = 0; i < amountOfImagesInSwapchain; i++)
