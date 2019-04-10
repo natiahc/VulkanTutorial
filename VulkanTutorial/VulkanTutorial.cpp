@@ -29,6 +29,7 @@ VkShaderModule shaderModuleFrag;
 VkPipelineLayout pipelineLayout;
 VkRenderPass renderPass;
 VkPipeline pipeline;
+VkCommandPool commandPool;
 uint32_t amountOfImagesInSwapchain = 0;
 GLFWwindow *window;
 
@@ -580,6 +581,9 @@ void startVulkan()
 	commandPoolCreateInfo.flags = 0;
 	commandPoolCreateInfo.queueFamilyIndex = 0;
 
+	result = vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &commandPool);
+	ASSERT_VULKAN(result);
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
@@ -596,6 +600,8 @@ void gameLoop()
 void shutdownVulkan()
 {
 	vkDeviceWaitIdle(device);
+	vkDestroyCommandPool(device, commandPool, nullptr);
+
 	for (size_t i = 0; i < amountOfImagesInSwapchain; i++)
 	{
 		vkDestroyFramebuffer(device, framebuffers[i], nullptr);
