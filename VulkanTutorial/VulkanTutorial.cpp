@@ -499,6 +499,11 @@ void startVulkan()
 	attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+	VkAttachmentReference attachmentReference;
+	attachmentReference.attachment = 0;
+	attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
