@@ -650,7 +650,11 @@ void startVulkan()
 }
 
 void drawFrame()
-{}
+{
+	uint32_t imageIndex;
+	vkAcquireNextImageKHR(device, swapchain, std::numeric_limits<uint64_t>::max(), 
+		semaphoreImageAvailable, VK_NULL_HANDLE, &imageIndex);
+}
 
 void gameLoop()
 {
