@@ -602,6 +602,14 @@ void startVulkan()
 	commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 	commandBufferBeginInfo.pInheritanceInfo = nullptr;
 
+	for (size_t i = 0; i < amountOfImagesInSwapchain; i++)
+	{
+		vkBeginCommandBuffer(commandBuffers[i], &commandBufferBeginInfo);
+		
+		result = vkEndCommandBuffer(commandBuffers[i]);
+		ASSERT_VULKAN(result);
+	}
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
