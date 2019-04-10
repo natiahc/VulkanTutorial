@@ -679,6 +679,16 @@ void drawFrame()
 
 	VkResult result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 	ASSERT_VULKAN(result);
+
+	VkPresentInfoKHR presentInfo;
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.pNext = nullptr;
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = &semaphoreRenderingDone;
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = &swapchain;
+	presentInfo.pImageIndices = &imageIndex;
+	presentInfo.pResults = nullptr;
 }
 
 void gameLoop()
