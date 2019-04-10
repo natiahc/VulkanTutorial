@@ -555,6 +555,20 @@ void startVulkan()
 	result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline);
 	ASSERT_VULKAN(result);
 
+	for (size_t i = 0; i < amountOfImagesInSwapchain; i++)
+	{
+		VkFramebufferCreateInfo framebufferCreatInfo;
+		framebufferCreatInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferCreatInfo.pNext = nullptr;
+		framebufferCreatInfo.flags = 0;
+		framebufferCreatInfo.renderPass = renderPass;
+		framebufferCreatInfo.attachmentCount = 1;
+		framebufferCreatInfo.pAttachments = &(imageViews[i]);
+		framebufferCreatInfo.width = WIDTH;
+		framebufferCreatInfo.height = HEIGHT;
+		framebufferCreatInfo.layers = 1;
+	}
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
