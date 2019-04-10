@@ -503,6 +503,17 @@ void startVulkan()
 	attachmentReference.attachment = 0;
 	attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+	VkSubpassDescription subPassDescription;
+	subPassDescription.flags = 0;
+	subPassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subPassDescription.inputAttachmentCount = 0;
+	subPassDescription.pInputAttachments = nullptr;
+	subPassDescription.colorAttachmentCount = 1;
+	subPassDescription.pColorAttachments = &attachmentReference;
+	subPassDescription.pResolveAttachments = nullptr;
+	subPassDescription.pDepthStencilAttachment = nullptr;
+	subPassDescription.preserveAttachmentCount = 0;
+	subPassDescription.pPreserveAttachments = nullptr;
 
 	delete[] swapchainImages;
 	delete[] layers;
