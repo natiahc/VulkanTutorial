@@ -26,6 +26,7 @@ VkImageView *imageViews;
 VkShaderModule shaderModuleVert;
 VkShaderModule shaderModuleFrag;
 VkPipelineLayout pipelineLayout;
+VkRenderPass renderPass;
 uint32_t amountOfImagesInSwapchain = 0;
 GLFWwindow *window;
 
@@ -526,6 +527,9 @@ void startVulkan()
 	renderPassCreateInfo.dependencyCount = 0;
 	renderPassCreateInfo.pDependencies = nullptr;
 
+	result = vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass);
+	ASSERT_VULKAN(result);
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
@@ -543,6 +547,7 @@ void shutdownVulkan()
 {
 	vkDeviceWaitIdle(device);
 
+	vkDestroyRenderPass(device, renderPass, nullptr);
 	for (int i = 0; i < amountOfImagesInSwapchain; i++)
 	{
 		vkDestroyImageView(device, imageViews[i], nullptr);
