@@ -29,8 +29,10 @@ VkShaderModule shaderModuleFrag;
 VkPipelineLayout pipelineLayout;
 VkRenderPass renderPass;
 VkPipeline pipeline;
-VkCommandBuffer *commandBuffers;
 VkCommandPool commandPool;
+VkCommandBuffer *commandBuffers;
+VkSemaphore semaphoreImageAvailable;
+VkSemaphore semaphoreRenderingDone;
 uint32_t amountOfImagesInSwapchain = 0;
 GLFWwindow *window;
 
@@ -636,6 +638,12 @@ void startVulkan()
 	semaphoreCreateInfo.pNext = nullptr;
 	semaphoreCreateInfo.flags = 0;
 
+	result = vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreImageAvailable);
+	ASSERT_VULKAN(result);
+
+	result = vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreRenderingDone);
+	ASSERT_VULKAN(result);
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
@@ -656,6 +664,9 @@ void gameLoop()
 void shutdownVulkan()
 {
 	vkDeviceWaitIdle(device);
+
+	vkDestroySemaphore(device, semaphoreImageAvailable, nullptr);
+	vkDestroySemaphore(device, semaphoreRenderingDone, nullptr);
 
 	vkFreeCommandBuffers(device, commandPool, amountOfImagesInSwapchain, commandBuffers);
 	delete[] commandBuffers;
