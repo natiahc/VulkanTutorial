@@ -623,6 +623,8 @@ void startVulkan()
 
 		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
+		vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+
 		vkCmdEndRenderPass(commandBuffers[i]);
 		
 		result = vkEndCommandBuffer(commandBuffers[i]);
