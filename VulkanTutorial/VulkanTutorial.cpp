@@ -584,6 +584,13 @@ void startVulkan()
 	result = vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &commandPool);
 	ASSERT_VULKAN(result);
 
+	VkCommandBufferAllocateInfo commandBufferAllocateInfo;
+	commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	commandBufferAllocateInfo.pNext = nullptr;
+	commandBufferAllocateInfo.commandPool = commandPool;
+	commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	commandBufferAllocateInfo.commandBufferCount = amountOfImagesInSwapchain;
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
