@@ -654,6 +654,19 @@ void drawFrame()
 	uint32_t imageIndex;
 	vkAcquireNextImageKHR(device, swapchain, std::numeric_limits<uint64_t>::max(), 
 		semaphoreImageAvailable, VK_NULL_HANDLE, &imageIndex);
+
+	VkSubmitInfo submitInfo;
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.pNext = nullptr;
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = &semaphoreImageAvailable;
+	
+	VkPipelineStageFlags waitStageMask[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	submitInfo.pWaitDstStageMask = waitStageMask;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &(commandBuffers[imageIndex]);
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = &semaphoreRenderingDone;
 }
 
 void gameLoop()
