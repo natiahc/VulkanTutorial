@@ -574,6 +574,12 @@ void startVulkan()
 		ASSERT_VULKAN(result);
 	}
 
+	VkCommandPoolCreateInfo commandPoolCreateInfo;
+	commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	commandPoolCreateInfo.pNext = nullptr;
+	commandPoolCreateInfo.flags = 0;
+	commandPoolCreateInfo.queueFamilyIndex = 0;
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
