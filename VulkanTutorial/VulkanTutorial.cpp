@@ -515,6 +515,17 @@ void startVulkan()
 	subPassDescription.preserveAttachmentCount = 0;
 	subPassDescription.pPreserveAttachments = nullptr;
 
+	VkRenderPassCreateInfo renderPassCreateInfo;
+	renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassCreateInfo.pNext = nullptr;
+	renderPassCreateInfo.flags = 0;
+	renderPassCreateInfo.attachmentCount = 1;
+	renderPassCreateInfo.pAttachments = &attachmentDescription;
+	renderPassCreateInfo.subpassCount = 1;
+	renderPassCreateInfo.pSubpasses = &subPassDescription;
+	renderPassCreateInfo.dependencyCount = 0;
+	renderPassCreateInfo.pDependencies = nullptr;
+
 	delete[] swapchainImages;
 	delete[] layers;
 	delete[] extensions;
