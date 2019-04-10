@@ -689,6 +689,9 @@ void drawFrame()
 	presentInfo.pSwapchains = &swapchain;
 	presentInfo.pImageIndices = &imageIndex;
 	presentInfo.pResults = nullptr;
+
+	result = vkQueuePresentKHR(queue, &presentInfo);
+	ASSERT_VULKAN(result);
 }
 
 void gameLoop()
