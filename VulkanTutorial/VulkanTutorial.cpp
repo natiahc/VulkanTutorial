@@ -19,10 +19,11 @@
 		}
 
 VkInstance instance;
-VkSurfaceKHR surface;
+std::vector<VkPhysicalDevice> physicalDevices;
+VkSurfaceKHR surface; 
 VkDevice device;
 VkFramebuffer *framebuffers;
-VkSwapchainKHR swapchain;
+VkSwapchainKHR swapchain = VK_NULL_HANDLE;
 VkImageView *imageViews;
 VkShaderModule shaderModuleVert;
 VkShaderModule shaderModuleFrag;
@@ -37,8 +38,8 @@ VkQueue queue;
 uint32_t amountOfImagesInSwapchain = 0;
 GLFWwindow *window;
 
-const uint32_t WIDTH = 400;
-const uint32_t HEIGHT = 300;
+uint32_t width = 400;
+uint32_t height = 300;
 const VkFormat ourFormat = VK_FORMAT_B8G8R8A8_UNORM;
 
 void printStats(VkPhysicalDevice &device)
@@ -156,13 +157,32 @@ std::vector<char> readFile(std::string fileName)
 	}
 }
 
+void recreateSwapchain();
+void onWindowResized(GLFWwindow *window, int w, int h)
+{
+	VkSurfaceCapabilitiesKHR surfaceCapabilities;
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevices[0], surface, &surfaceCapabilities);
+
+	if (w > surfaceCapabilities.maxImageExtent.width) w = surfaceCapabilities.maxImageExtent.width;
+	if (h > surfaceCapabilities.maxImageExtent.height) h = surfaceCapabilities.maxImageExtent.height;
+
+	if (w == 0 || h == 0) return;
+
+	width = w;
+	height = h;
+
+	recreateSwapchain();
+}
+
 void startGlfw()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-	window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan Tutorial", nullptr, nullptr);
+	window = glfwCreateWindow(width, height, "Vulkan Tutorial", nullptr, nullptr);
+
+	glfwSetWindowSizeCallback(window, onWindowResized);
 }
 
 void createShaderModule(const std::vector<char>& code, VkShaderModule *shaderModule)
@@ -275,7 +295,6 @@ std::vector<VkPhysicalDevice> getAllPhysicalDevices()
 
 void printStatsOfAllPhysicalDevices()
 {
-	auto physicalDevices = getAllPhysicalDevices();
 	for (int i = 0; i < physicalDevices.size(); i++)
 	{
 		printStats(physicalDevices[i]);
@@ -312,7 +331,7 @@ void createLogicalDevice()
 	deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
 	deviceCreateInfo.pEnabledFeatures = &usedFeature;
 
-	VkResult result = vkCreateDevice((getAllPhysicalDevices())[0], &deviceCreateInfo, nullptr, &device);
+	VkResult result = vkCreateDevice(physicalDevices[0], &deviceCreateInfo, nullptr, &device);
 	ASSERT_VULKAN(result);
 }
 
@@ -324,7 +343,7 @@ void createQueue()
 void checkSurfaceSupport()
 {
 	VkBool32 surfaceSupport = false;
-	VkResult result = vkGetPhysicalDeviceSurfaceSupportKHR((getAllPhysicalDevices())[0], 0, surface, &surfaceSupport);
+	VkResult result = vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevices[0], 0, surface, &surfaceSupport);
 	ASSERT_VULKAN(result);
 
 	if (!surfaceSupport)
@@ -344,7 +363,7 @@ void createSwapChain()
 	swapchainCreateInfo.minImageCount = 3;
 	swapchainCreateInfo.imageFormat = ourFormat;
 	swapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-	swapchainCreateInfo.imageExtent = VkExtent2D{ WIDTH, HEIGHT };
+	swapchainCreateInfo.imageExtent = VkExtent2D{ width, height };
 	swapchainCreateInfo.imageArrayLayers = 1;
 	swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 	swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -354,7 +373,7 @@ void createSwapChain()
 	swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 	swapchainCreateInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
 	swapchainCreateInfo.clipped = VK_TRUE;
-	swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+	swapchainCreateInfo.oldSwapchain = swapchain;
 
 	VkResult result = vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain);
 	ASSERT_VULKAN(result);
@@ -494,14 +513,14 @@ void createPipeline()
 	VkViewport viewport;
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.width = WIDTH;
-	viewport.height = HEIGHT;
+	viewport.width = width;
+	viewport.height = height;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
 	VkRect2D scissor;
 	scissor.offset = { 0, 0 };
-	scissor.extent = { WIDTH, HEIGHT };
+	scissor.extent = { width, height };
 
 	VkPipelineViewportStateCreateInfo viewportStateCreateInfo;
 	viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -610,8 +629,8 @@ void createFrameBuffers()
 		framebufferCreatInfo.renderPass = renderPass;
 		framebufferCreatInfo.attachmentCount = 1;
 		framebufferCreatInfo.pAttachments = &(imageViews[i]);
-		framebufferCreatInfo.width = WIDTH;
-		framebufferCreatInfo.height = HEIGHT;
+		framebufferCreatInfo.width = width;
+		framebufferCreatInfo.height = height;
 		framebufferCreatInfo.layers = 1;
 
 		VkResult result = vkCreateFramebuffer(device, &framebufferCreatInfo, nullptr, &(framebuffers[i]));
@@ -664,7 +683,7 @@ void recordCommandBuffers()
 		renderPassBeginInfo.renderPass = renderPass;
 		renderPassBeginInfo.framebuffer = framebuffers[i];
 		renderPassBeginInfo.renderArea.offset = { 0, 0 };
-		renderPassBeginInfo.renderArea.extent = { WIDTH, HEIGHT };
+		renderPassBeginInfo.renderArea.extent = { width, height };
 
 		VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 1.0f };
 		renderPassBeginInfo.clearValueCount = 1;
@@ -700,6 +719,7 @@ void createSemaphores()
 void startVulkan()
 {
 	createInstance();
+	physicalDevices = getAllPhysicalDevices();
 	printInstanceLayers();
 	printInstanceExtensions();
 	createGlfwWindowSurface();
@@ -718,11 +738,53 @@ void startVulkan()
 	createSemaphores();
 }
 
+void recreateSwapchain()
+{
+	vkDeviceWaitIdle(device);
+
+	vkFreeCommandBuffers(device, commandPool, amountOfImagesInSwapchain, commandBuffers);
+	delete[] commandBuffers;
+
+	vkDestroyCommandPool(device, commandPool, nullptr);
+
+	for (size_t i = 0; i < amountOfImagesInSwapchain; i++)
+	{
+		vkDestroyFramebuffer(device, framebuffers[i], nullptr);
+	}
+	delete[] framebuffers;
+
+	vkDestroyPipeline(device, pipeline, nullptr);
+	vkDestroyRenderPass(device, renderPass, nullptr);
+	for (int i = 0; i < amountOfImagesInSwapchain; i++)
+	{
+		vkDestroyImageView(device, imageViews[i], nullptr);
+	}
+
+	delete[] imageViews;
+	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+	vkDestroyShaderModule(device, shaderModuleVert, nullptr);
+	vkDestroyShaderModule(device, shaderModuleFrag, nullptr);
+	
+	VkSwapchainKHR oldSwapchain = swapchain;
+
+	createSwapChain();
+	createImageViews();
+	createRenderPass();
+	createPipeline();
+	createFrameBuffers();
+	createCommandPool();
+	createCommandBuffers();
+	recordCommandBuffers();
+
+	vkDestroySwapchainKHR(device, oldSwapchain, nullptr);
+}
+
 void drawFrame()
 {
 	uint32_t imageIndex;
-	vkAcquireNextImageKHR(device, swapchain, std::numeric_limits<uint64_t>::max(), 
+	VkResult  result = vkAcquireNextImageKHR(device, swapchain, std::numeric_limits<uint64_t>::max(), 
 		semaphoreImageAvailable, VK_NULL_HANDLE, &imageIndex);
+	ASSERT_VULKAN(result);
 
 	VkSubmitInfo submitInfo;
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -737,7 +799,7 @@ void drawFrame()
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = &semaphoreRenderingDone;
 
-	VkResult result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+	result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 	ASSERT_VULKAN(result);
 
 	VkPresentInfoKHR presentInfo;
@@ -769,30 +831,6 @@ void shutdownVulkan()
 
 	vkDestroySemaphore(device, semaphoreImageAvailable, nullptr);
 	vkDestroySemaphore(device, semaphoreRenderingDone, nullptr);
-
-	vkFreeCommandBuffers(device, commandPool, amountOfImagesInSwapchain, commandBuffers);
-	delete[] commandBuffers;
-
-	vkDestroyCommandPool(device, commandPool, nullptr);
-
-	for (size_t i = 0; i < amountOfImagesInSwapchain; i++)
-	{
-		vkDestroyFramebuffer(device, framebuffers[i], nullptr);
-	}
-	delete[] framebuffers;
-
-	vkDestroyPipeline(device, pipeline, nullptr);
-	vkDestroyRenderPass(device, renderPass, nullptr);
-	for (int i = 0; i < amountOfImagesInSwapchain; i++)
-	{
-		vkDestroyImageView(device, imageViews[i], nullptr);
-	}
-
-	delete[] imageViews;
-	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-	vkDestroyShaderModule(device, shaderModuleVert, nullptr);
-	vkDestroyShaderModule(device, shaderModuleFrag, nullptr);
-	vkDestroySwapchainKHR(device, swapchain, nullptr);
 	vkDestroyDevice(device, nullptr);
 	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
