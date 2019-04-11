@@ -580,6 +580,18 @@ void createPipeline()
 	colorBlendCreateInfo.blendConstants[2] = 0.0f;
 	colorBlendCreateInfo.blendConstants[3] = 0.0f;
 
+	VkDynamicState dynamicStates[] = {
+		VK_DYNAMIC_STATE_VIEWPORT,
+		VK_DYNAMIC_STATE_SCISSOR
+	};
+
+	VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
+	dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	dynamicStateCreateInfo.pNext = nullptr;
+	dynamicStateCreateInfo.flags = 0;
+	dynamicStateCreateInfo.dynamicStateCount = 2;
+	dynamicStateCreateInfo.pDynamicStates = dynamicStates;
+
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
 	pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutCreateInfo.pNext = nullptr;
@@ -606,7 +618,7 @@ void createPipeline()
 	pipelineCreateInfo.pMultisampleState = &multiSampleCreateInfo;
 	pipelineCreateInfo.pDepthStencilState = nullptr;
 	pipelineCreateInfo.pColorBlendState = &colorBlendCreateInfo;
-	pipelineCreateInfo.pDynamicState = nullptr;
+	pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 	pipelineCreateInfo.layout = pipelineLayout;
 	pipelineCreateInfo.renderPass = renderPass;
 	pipelineCreateInfo.subpass = 0;
@@ -693,6 +705,20 @@ void recordCommandBuffers()
 
 		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
+		VkViewport viewport;
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = width;
+		viewport.height = height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
+
+		VkRect2D scissor;
+		scissor.offset = { 0, 0 };
+		scissor.extent = { width, height };
+		vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
+
 		vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffers[i]);
@@ -753,7 +779,7 @@ void recreateSwapchain()
 	}
 	delete[] framebuffers;
 
-	vkDestroyPipeline(device, pipeline, nullptr);
+	//vkDestroyPipeline(device, pipeline, nullptr);
 	vkDestroyRenderPass(device, renderPass, nullptr);
 	for (int i = 0; i < amountOfImagesInSwapchain; i++)
 	{
@@ -761,16 +787,16 @@ void recreateSwapchain()
 	}
 
 	delete[] imageViews;
-	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-	vkDestroyShaderModule(device, shaderModuleVert, nullptr);
-	vkDestroyShaderModule(device, shaderModuleFrag, nullptr);
+	//vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+	//vkDestroyShaderModule(device, shaderModuleVert, nullptr);
+	//vkDestroyShaderModule(device, shaderModuleFrag, nullptr);
 	
 	VkSwapchainKHR oldSwapchain = swapchain;
 
 	createSwapChain();
 	createImageViews();
 	createRenderPass();
-	createPipeline();
+	//createPipeline();
 	createFrameBuffers();
 	createCommandPool();
 	createCommandBuffers();
