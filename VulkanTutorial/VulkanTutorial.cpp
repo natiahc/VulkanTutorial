@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <glm/glm.hpp>
 
 #define ASSERT_VULKAN(val)\
 		if(val!=VK_SUCCESS) \
@@ -41,6 +42,23 @@ GLFWwindow *window;
 uint32_t width = 400;
 uint32_t height = 300;
 const VkFormat ourFormat = VK_FORMAT_B8G8R8A8_UNORM;
+
+class Vertex 
+{
+public:
+	glm::vec2 pos;
+	glm::vec3 color;
+
+	Vertex(glm::vec2 pos, glm::vec3 color)
+		: pos(pos), color(color)
+	{}
+};
+
+std::vector<Vertex> vertices = {
+	Vertex({  0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f }),
+	Vertex({  0.5f,  0.5f }, { 0.0f, 1.0f, 0.0f }),
+	Vertex({ -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f })
+};
 
 void printStats(VkPhysicalDevice &device)
 {
@@ -865,6 +883,7 @@ void shutdownVulkan()
 void shutdownGlfw()
 {
 	glfwDestroyWindow(window);
+	glfwTerminate();
 }
 
 int main()
