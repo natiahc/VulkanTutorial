@@ -52,6 +52,16 @@ public:
 	Vertex(glm::vec2 pos, glm::vec3 color)
 		: pos(pos), color(color)
 	{}
+
+	static VkVertexInputBindingDescription getBindingDescription()
+	{
+		VkVertexInputBindingDescription vertexInputBindingDescription;
+		vertexInputBindingDescription.binding = 0;
+		vertexInputBindingDescription.stride = sizeof(Vertex);
+		vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+		return vertexInputBindingDescription;
+	}
 };
 
 std::vector<Vertex> vertices = {
