@@ -769,6 +769,8 @@ void createVertexBuffer()
 
 	result = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &vertexBufferDeviceMemory);
 	ASSERT_VULKAN(result);
+
+	vkBindBufferMemory(device, vertexBuffer, vertexBufferDeviceMemory, 0);
 }
 
 void recordCommandBuffers()
