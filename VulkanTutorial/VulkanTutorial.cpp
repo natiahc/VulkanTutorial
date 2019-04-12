@@ -63,7 +63,7 @@ public:
 		return vertexInputBindingDescription;
 	}
 
-	std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions()
+	static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions()
 	{
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 		vertexInputAttributeDescriptions[0].location = 0;
@@ -538,14 +538,17 @@ void createPipeline()
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { shaderStageCreateInfoVert, shaderStageCreateInfoFrag };
 
+	auto vertexBindingDescription = Vertex::getBindingDescription();
+	auto vertexAttributeDescriptions = Vertex::getAttributeDescriptions();
+
 	VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo;
 	vertexInputCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertexInputCreateInfo.pNext = nullptr;
 	vertexInputCreateInfo.flags = 0;
-	vertexInputCreateInfo.vertexBindingDescriptionCount = 0;
-	vertexInputCreateInfo.pVertexBindingDescriptions = nullptr;
-	vertexInputCreateInfo.vertexAttributeDescriptionCount = 0;
-	vertexInputCreateInfo.pVertexAttributeDescriptions = nullptr;
+	vertexInputCreateInfo.vertexBindingDescriptionCount = 1;
+	vertexInputCreateInfo.pVertexBindingDescriptions = &vertexBindingDescription;
+	vertexInputCreateInfo.vertexAttributeDescriptionCount = vertexAttributeDescriptions.size();
+	vertexInputCreateInfo.pVertexAttributeDescriptions = vertexAttributeDescriptions.data();
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyCreateInfo;
 	inputAssemblyCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
