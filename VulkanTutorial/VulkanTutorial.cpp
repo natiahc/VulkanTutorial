@@ -35,6 +35,7 @@ VkCommandPool commandPool;
 VkCommandBuffer *commandBuffers;
 VkSemaphore semaphoreImageAvailable;
 VkSemaphore semaphoreRenderingDone;
+VkBuffer vertexBuffer;
 VkQueue queue;
 uint32_t amountOfImagesInSwapchain = 0;
 GLFWwindow *window;
@@ -734,6 +735,9 @@ void createVertexBuffer()
 	bufferCreateInfo.sharingMode - VK_SHARING_MODE_EXCLUSIVE;
 	bufferCreateInfo.queueFamilyIndexCount = 0;
 	bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+	VkResult result = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &vertexBuffer);
+	ASSERT_VULKAN(result);
 }
 
 void recordCommandBuffers()
@@ -916,8 +920,35 @@ void shutdownVulkan()
 {
 	vkDeviceWaitIdle(device);
 
+	vkDestroyBuffer(device, vertexBuffer, nullptr);
+
 	vkDestroySemaphore(device, semaphoreImageAvailable, nullptr);
 	vkDestroySemaphore(device, semaphoreRenderingDone, nullptr);
+
+	vkFreeCommandBuffers(device, commandPool, amountOfImagesInSwapchain, commandBuffers);
+	delete[] commandBuffers;
+
+	vkDestroyCommandPool(device, commandPool, nullptr);
+
+	for (size_t i = 0; i < amountOfImagesInSwapchain; i++)
+	{
+		vkDestroyFramebuffer(device, framebuffers[i], nullptr);
+	}
+	delete[] framebuffers;
+
+	vkDestroyPipeline(device, pipeline, nullptr);
+	vkDestroyRenderPass(device, renderPass, nullptr);
+	for (int i = 0; i < amountOfImagesInSwapchain; i++)
+	{
+		vkDestroyImageView(device, imageViews[i], nullptr);
+	}
+
+	delete[] imageViews;
+	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+	vkDestroyShaderModule(device, shaderModuleVert, nullptr);
+	vkDestroyShaderModule(device, shaderModuleFrag, nullptr);
+	vkDestroySwapchainKHR(device, swapchain, nullptr);
+
 	vkDestroyDevice(device, nullptr);
 	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
