@@ -724,6 +724,23 @@ void createCommandBuffers()
 	ASSERT_VULKAN(result);
 }
 
+uint32_t findMemoryTypeIndex(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+	VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+	vkGetPhysicalDeviceMemoryProperties(physicalDevices[0], &physicalDeviceMemoryProperties);
+	for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; i++)
+	{
+		if ((typeFilter & (1 << i)) && 
+			(physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties)
+		{
+			return i;
+		}
+	}
+
+	__debugbreak();
+	throw std::runtime_error("Found no correct memory type");
+}
+
 void createVertexBuffer()
 {
 	VkBufferCreateInfo bufferCreateInfo;
@@ -741,6 +758,13 @@ void createVertexBuffer()
 
 	VkMemoryRequirements memoryRequirements;
 	vkGetBufferMemoryRequirements(device, vertexBuffer, &memoryRequirements);
+
+	VkMemoryAllocateInfo memoryAllocateInfo;
+	memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	memoryAllocateInfo.pNext = nullptr;
+	memoryAllocateInfo.allocationSize = memoryRequirements.size;
+	memoryAllocateInfo.memoryTypeIndex = findMemoryTypeIndex(memoryRequirements.memoryTypeBits, 
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
 void recordCommandBuffers()
