@@ -723,6 +723,19 @@ void createCommandBuffers()
 	ASSERT_VULKAN(result);
 }
 
+void createVertexBuffer()
+{
+	VkBufferCreateInfo bufferCreateInfo;
+	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferCreateInfo.pNext = nullptr;
+	bufferCreateInfo.flags = 0;
+	bufferCreateInfo.size = sizeof(Vertex) * vertices.size();
+	bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	bufferCreateInfo.sharingMode - VK_SHARING_MODE_EXCLUSIVE;
+	bufferCreateInfo.queueFamilyIndexCount = 0;
+	bufferCreateInfo.pQueueFamilyIndices = nullptr;
+}
+
 void recordCommandBuffers()
 {
 	VkCommandBufferBeginInfo commandBufferBeginInfo;
@@ -807,6 +820,7 @@ void startVulkan()
 	createFrameBuffers();
 	createCommandPool();
 	createCommandBuffers();
+	createVertexBuffer();
 	recordCommandBuffers();
 	createSemaphores();
 }
