@@ -68,6 +68,7 @@ public:
 	static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions()
 	{
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
+		vertexInputAttributeDescriptions.resize(2);
 		vertexInputAttributeDescriptions[0].location = 0;
 		vertexInputAttributeDescriptions[0].binding = 0;
 		vertexInputAttributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
@@ -83,8 +84,8 @@ public:
 };
 
 std::vector<Vertex> vertices = {
-	Vertex({  0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f }),
-	Vertex({  0.5f,  0.5f }, { 0.0f, 1.0f, 0.0f }),
+	Vertex({  0.0f, -0.5f }, { 1.0f, 0.0f, 1.0f }),
+	Vertex({  0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f }),
 	Vertex({ -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f })
 };
 
@@ -821,7 +822,9 @@ void recordCommandBuffers()
 		scissor.extent = { width, height };
 		vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
 
-		vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
+		vkCmdDraw(commandBuffers[i], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffers[i]);
 
