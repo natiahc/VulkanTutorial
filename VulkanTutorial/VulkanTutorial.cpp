@@ -771,6 +771,11 @@ void createVertexBuffer()
 	ASSERT_VULKAN(result);
 
 	vkBindBufferMemory(device, vertexBuffer, vertexBufferDeviceMemory, 0);
+
+	void* rawData;
+	vkMapMemory(device, vertexBufferDeviceMemory, 0, bufferCreateInfo.size, 0, &rawData);
+	memcpy(rawData, vertices.data(), bufferCreateInfo.size);
+	vkUnmapMemory(device, vertexBufferDeviceMemory);
 }
 
 void recordCommandBuffers()
