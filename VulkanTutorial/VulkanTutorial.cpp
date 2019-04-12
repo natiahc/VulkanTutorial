@@ -36,6 +36,7 @@ VkCommandBuffer *commandBuffers;
 VkSemaphore semaphoreImageAvailable;
 VkSemaphore semaphoreRenderingDone;
 VkBuffer vertexBuffer;
+VkDeviceMemory vertexBufferDeviceMemory;
 VkQueue queue;
 uint32_t amountOfImagesInSwapchain = 0;
 GLFWwindow *window;
@@ -765,6 +766,9 @@ void createVertexBuffer()
 	memoryAllocateInfo.allocationSize = memoryRequirements.size;
 	memoryAllocateInfo.memoryTypeIndex = findMemoryTypeIndex(memoryRequirements.memoryTypeBits, 
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+	result = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &vertexBufferDeviceMemory);
+	ASSERT_VULKAN(result);
 }
 
 void recordCommandBuffers()
@@ -947,6 +951,7 @@ void shutdownVulkan()
 {
 	vkDeviceWaitIdle(device);
 
+	vkFreeMemory(device, vertexBufferDeviceMemory, nullptr);
 	vkDestroyBuffer(device, vertexBuffer, nullptr);
 
 	vkDestroySemaphore(device, semaphoreImageAvailable, nullptr);
