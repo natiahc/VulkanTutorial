@@ -12,6 +12,8 @@
 #include <vector>
 #include <fstream>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <chrono>
 
 #define ASSERT_VULKAN(val)\
 		if(val!=VK_SUCCESS) \
@@ -39,6 +41,8 @@ VkBuffer vertexBuffer;
 VkDeviceMemory vertexBufferDeviceMemory;
 VkBuffer indexBuffer;
 VkDeviceMemory indexBufferDeviceMemory;
+VkBuffer uniformBuffer;
+VkDeviceMemory uniformBufferMemory;
 VkQueue queue;
 uint32_t amountOfImagesInSwapchain = 0;
 GLFWwindow *window;
@@ -46,6 +50,11 @@ GLFWwindow *window;
 uint32_t width = 400;
 uint32_t height = 300;
 const VkFormat ourFormat = VK_FORMAT_B8G8R8A8_UNORM;
+
+glm::mat4 MVP;
+VkDescriptorSetLayout descriptorSetLayout;
+VkDescriptorPool descriptorPool;
+VkDescriptorSet descriptorSet;
 
 class Vertex 
 {
@@ -102,7 +111,7 @@ void printStats(VkPhysicalDevice &device)
 	vkGetPhysicalDeviceProperties(device, &properties);
 
 	std::cout << "Name: " << properties.deviceName << std::endl;
-	
+
 	uint32_t apiVer = properties.apiVersion;
 	std::cout << "API Version: " << VK_VERSION_MAJOR(apiVer) << "." << 
 		VK_VERSION_MINOR(apiVer) << "." << VK_VERSION_PATCH(apiVer) << std::endl;
@@ -518,6 +527,26 @@ void createRenderPass()
 	ASSERT_VULKAN(result);
 }
 
+void createDescriptorSetLayout()
+{
+	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding;
+	descriptorSetLayoutBinding.binding = 0;
+	descriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding.descriptorCount = 1;
+	descriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	descriptorSetLayoutBinding.pImmutableSamplers = nullptr;
+
+	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
+	descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	descriptorSetLayoutCreateInfo.pNext = nullptr;
+	descriptorSetLayoutCreateInfo.flags = 0;
+	descriptorSetLayoutCreateInfo.bindingCount = 1;
+	descriptorSetLayoutCreateInfo.pBindings = &descriptorSetLayoutBinding;
+
+	VkResult result = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout);
+	ASSERT_VULKAN(result);
+}
+
 void createPipeline()
 {
 	auto shadercodeVert = readFile("vert.spv");
@@ -594,7 +623,7 @@ void createPipeline()
 	rasterizationCreatInfo.rasterizerDiscardEnable = VK_FALSE;
 	rasterizationCreatInfo.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizationCreatInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizationCreatInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizationCreatInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizationCreatInfo.depthBiasEnable = VK_FALSE;
 	rasterizationCreatInfo.depthBiasConstantFactor = 0.0f;
 	rasterizationCreatInfo.depthBiasClamp = 0.0f;
@@ -651,10 +680,10 @@ void createPipeline()
 	pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutCreateInfo.pNext = nullptr;
 	pipelineLayoutCreateInfo.flags = 0;
-	pipelineLayoutCreateInfo.setLayoutCount = 0;
-	pipelineLayoutCreateInfo.pSetLayouts = nullptr;
+	pipelineLayoutCreateInfo.setLayoutCount = 1;
+	pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-	pipelineLayoutCreateInfo.pPushConstantRanges = 0;
+	pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
 	VkResult result = vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
 	ASSERT_VULKAN(result);
@@ -864,6 +893,64 @@ void createIndexBuffer()
 	createAndUploadBuffer(indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indexBuffer, indexBufferDeviceMemory);
 }
 
+void createUniformBuffer()
+{
+	VkDeviceSize bufferSize = sizeof(MVP);
+	createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		uniformBufferMemory);
+}
+
+void createDescriptorPool()
+{
+	VkDescriptorPoolSize descriptorPoolSize;
+	descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorPoolSize.descriptorCount = 1;
+
+	VkDescriptorPoolCreateInfo descriptorPoolCreateInfo;
+	descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	descriptorPoolCreateInfo.pNext = nullptr;
+	descriptorPoolCreateInfo.flags = 0;
+	descriptorPoolCreateInfo.maxSets = 1;
+	descriptorPoolCreateInfo.poolSizeCount = 1;
+	descriptorPoolCreateInfo.pPoolSizes = &descriptorPoolSize;
+
+	VkResult result = vkCreateDescriptorPool(device, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
+	ASSERT_VULKAN(result);
+}
+
+void createDescriptorSet()
+{
+	VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
+	descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	descriptorSetAllocateInfo.pNext = nullptr;
+	descriptorSetAllocateInfo.descriptorPool = descriptorPool;
+	descriptorSetAllocateInfo.descriptorSetCount = 1;
+	descriptorSetAllocateInfo.pSetLayouts = &descriptorSetLayout;
+
+	VkResult result = vkAllocateDescriptorSets(device, &descriptorSetAllocateInfo, &descriptorSet);
+	ASSERT_VULKAN(result);
+
+	VkDescriptorBufferInfo descriptorBufferInfo;
+	descriptorBufferInfo.buffer = uniformBuffer;
+	descriptorBufferInfo.offset = 0;
+	descriptorBufferInfo.range = sizeof(MVP);
+
+	VkWriteDescriptorSet descriptorWrite;
+	descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	descriptorWrite.pNext = nullptr;
+	descriptorWrite.dstSet = descriptorSet;
+	descriptorWrite.dstBinding = 0;
+	descriptorWrite.dstArrayElement = 0;
+	descriptorWrite.descriptorCount = 1;
+	descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorWrite.pImageInfo = nullptr;
+	descriptorWrite.pBufferInfo = &descriptorBufferInfo;
+	descriptorWrite.pTexelBufferView = nullptr;
+
+	vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+}
+
 void recordCommandBuffers()
 {
 	VkCommandBufferBeginInfo commandBufferBeginInfo;
@@ -911,6 +998,7 @@ void recordCommandBuffers()
 		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
 		vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
+		vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 		//vkCmdDraw(commandBuffers[i], vertices.size(), 1, 0, 0);
 		vkCmdDrawIndexed(commandBuffers[i], indices.size(), 1, 0, 0, 0);
 
@@ -949,12 +1037,16 @@ void startVulkan()
 	createSwapChain();
 	createImageViews();
 	createRenderPass();
+	createDescriptorSetLayout();
 	createPipeline();
 	createFrameBuffers();
 	createCommandPool();
 	createCommandBuffers();
 	createVertexBuffer();
 	createIndexBuffer();
+	createUniformBuffer();
+	createDescriptorPool();
+	createDescriptorSet();
 	recordCommandBuffers();
 	createSemaphores();
 }
@@ -1037,11 +1129,34 @@ void drawFrame()
 	ASSERT_VULKAN(result);
 }
 
+auto gameStartTime = std::chrono::high_resolution_clock::now();
+void updateMVP()
+{
+	auto frameTime = std::chrono::high_resolution_clock::now();
+
+	float timeSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(frameTime - gameStartTime).count() / 1000.0f;
+
+	glm::mat4 model = glm::rotate(glm::mat4(), timeSinceStart * glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 view = glm::lookAt(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 projection = glm::perspective(glm::radians(60.0f), width / (float)height, 0.0f, 10.0f);
+	projection[1][1] *= -1;
+
+	MVP = projection * view * model;
+
+	void *data;
+	vkMapMemory(device, uniformBufferMemory, 0, sizeof(MVP), 0, &data);
+	memcpy(data, &MVP, sizeof(MVP));
+	vkUnmapMemory(device, uniformBufferMemory);
+}
+
 void gameLoop()
 {
 	while(!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
+
+		updateMVP();
+
 		drawFrame();
 	}
 }
@@ -1049,6 +1164,12 @@ void gameLoop()
 void shutdownVulkan()
 {
 	vkDeviceWaitIdle(device);
+
+	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+
+	vkFreeMemory(device, uniformBufferMemory, nullptr);
+	vkDestroyBuffer(device, uniformBuffer, nullptr);
 
 	vkFreeMemory(device, indexBufferDeviceMemory, nullptr);
 	vkDestroyBuffer(device, indexBuffer, nullptr);
