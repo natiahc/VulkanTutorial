@@ -169,6 +169,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DepthImage.h" />
     <ClInclude Include="EasyImage.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stdafx.h" />
